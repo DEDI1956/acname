@@ -29,9 +29,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// .wrangler/tmp/bundle-bbef12/checked-fetch.js
+// .wrangler/tmp/bundle-Oxmoev/checked-fetch.js
 var require_checked_fetch = __commonJS({
-  ".wrangler/tmp/bundle-bbef12/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-Oxmoev/checked-fetch.js"() {
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
       const url = request instanceof URL ? request : new URL(
@@ -74,10 +74,10 @@ var require_boolbase = __commonJS({
   }
 });
 
-// .wrangler/tmp/bundle-bbef12/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-Oxmoev/middleware-loader.entry.ts
 var import_checked_fetch90 = __toESM(require_checked_fetch());
 
-// .wrangler/tmp/bundle-bbef12/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-Oxmoev/middleware-insertion-facade.js
 var import_checked_fetch88 = __toESM(require_checked_fetch());
 
 // src/index.js
@@ -15522,6 +15522,36 @@ var src_default = {
         const html3 = await response.text();
         const $2 = load(html3);
         const title = $2("title").text();
+        const description = $2('meta[name="description"]').attr("content") || "";
+        const keywords = $2('meta[name="keywords"]').attr("content") || "";
+        const canonical = $2('link[rel="canonical"]').attr("href") || "";
+        const og = {
+          title: $2('meta[property="og:title"]').attr("content") || "",
+          description: $2('meta[property="og:description"]').attr("content") || "",
+          image: $2('meta[property="og:image"]').attr("content") || "",
+          url: $2('meta[property="og:url"]').attr("content") || "",
+          type: $2('meta[property="og:type"]').attr("content") || ""
+        };
+        const twitter = {
+          card: $2('meta[name="twitter:card"]').attr("content") || "",
+          title: $2('meta[name="twitter:title"]').attr("content") || "",
+          description: $2('meta[name="twitter:description"]').attr("content") || "",
+          image: $2('meta[name="twitter:image"]').attr("content") || ""
+        };
+        const headings = {
+          h1: [],
+          h2: [],
+          h3: []
+        };
+        $2("h1").each((i, el) => headings.h1.push($2(el).text().trim()));
+        $2("h2").each((i, el) => headings.h2.push($2(el).text().trim()));
+        $2("h3").each((i, el) => headings.h3.push($2(el).text().trim()));
+        const images = [];
+        $2("img").each((i, el) => {
+          const src = $2(el).attr("src");
+          const alt = $2(el).attr("alt") || "";
+          if (src) images.push({ src, alt });
+        });
         const links = [];
         $2("a").each((i, el) => {
           const href = $2(el).attr("href");
@@ -15531,10 +15561,20 @@ var src_default = {
           }
         });
         return new Response(JSON.stringify({
-          title,
-          linkCount: links.length,
-          links: links.slice(0, 50),
-          htmlLength: html3.length
+          metadata: { title, description, keywords, canonical },
+          social: { og, twitter },
+          content: {
+            headings,
+            imageCount: images.length,
+            images: images.slice(0, 20)
+            // Limit to top 20
+          },
+          links: {
+            count: links.length,
+            items: links.slice(0, 50)
+            // Limit to top 50
+          },
+          stats: { htmlLength: html3.length }
         }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" }
         });
@@ -15592,7 +15632,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-bbef12/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-Oxmoev/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -15625,7 +15665,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-bbef12/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-Oxmoev/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

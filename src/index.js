@@ -141,8 +141,40 @@ export default {
                 const $ = cheerio.load(html);
 
                 const title = $('title').text();
-                const links = [];
+                const description = $('meta[name="description"]').attr('content') || '';
+                const keywords = $('meta[name="keywords"]').attr('content') || '';
+                const canonical = $('link[rel="canonical"]').attr('href') || '';
 
+                const og = {
+                    title: $('meta[property="og:title"]').attr('content') || '',
+                    description: $('meta[property="og:description"]').attr('content') || '',
+                    image: $('meta[property="og:image"]').attr('content') || '',
+                    url: $('meta[property="og:url"]').attr('content') || '',
+                    type: $('meta[property="og:type"]').attr('content') || ''
+                };
+
+                const twitter = {
+                    card: $('meta[name="twitter:card"]').attr('content') || '',
+                    title: $('meta[name="twitter:title"]').attr('content') || '',
+                    description: $('meta[name="twitter:description"]').attr('content') || '',
+                    image: $('meta[name="twitter:image"]').attr('content') || ''
+                };
+
+                const headings = {
+                    h1: [], h2: [], h3: []
+                };
+                $('h1').each((i, el) => headings.h1.push($(el).text().trim()));
+                $('h2').each((i, el) => headings.h2.push($(el).text().trim()));
+                $('h3').each((i, el) => headings.h3.push($(el).text().trim()));
+
+                const images = [];
+                $('img').each((i, el) => {
+                    const src = $(el).attr('src');
+                    const alt = $(el).attr('alt') || '';
+                    if (src) images.push({ src, alt });
+                });
+
+                const links = [];
                 $('a').each((i, el) => {
                     const href = $(el).attr('href');
                     const text = $(el).text().trim();
@@ -152,10 +184,18 @@ export default {
                 });
 
                 return new Response(JSON.stringify({
-                    title,
-                    linkCount: links.length,
-                    links: links.slice(0, 50),
-                    htmlLength: html.length
+                    metadata: { title, description, keywords, canonical },
+                    social: { og, twitter },
+                    content: {
+                        headings,
+                        imageCount: images.length,
+                        images: images.slice(0, 20) // Limit to top 20
+                    },
+                    links: {
+                        count: links.length,
+                        items: links.slice(0, 50) // Limit to top 50
+                    },
+                    stats: { htmlLength: html.length }
                 }), {
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
                 });
